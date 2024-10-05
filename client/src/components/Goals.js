@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { TextField, Button, List, ListItem, ListItemText } from '@mui/material';
 
 const Goals = () => {
     const [goals, setGoals] = useState([]);
@@ -19,7 +20,6 @@ const Goals = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (editMode) {
-            // Update goal
             await axios.put(`http://localhost:5000/api/goals/${editGoalId}`, { title }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -28,7 +28,6 @@ const Goals = () => {
             setEditMode(false);
             setEditGoalId(null);
         } else {
-            // Create goal
             await axios.post('http://localhost:5000/api/goals', { title }, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('token')}`,
@@ -62,24 +61,26 @@ const Goals = () => {
         <div>
             <h2>Goals</h2>
             <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
+                <TextField
+                    label="Enter goal title"
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter goal title"
                     required
+                    variant="outlined"
                 />
-                <button type="submit">{editMode ? 'Update Goal' : 'Add Goal'}</button>
+                <Button variant="contained" color="primary" type="submit">
+                    {editMode ? 'Update Goal' : 'Add Goal'}
+                </Button>
             </form>
-            <ul>
+            <List>
                 {goals.map(goal => (
-                    <li key={goal.id}>
-                        {goal.title} 
-                        <button onClick={() => handleEdit(goal)}>Edit</button>
-                        <button onClick={() => handleDelete(goal.id)}>Delete</button>
-                    </li>
+                    <ListItem key={goal.id}>
+                        <ListItemText primary={goal.title} />
+                        <Button onClick={() => handleEdit(goal)}>Edit</Button>
+                        <Button onClick={() => handleDelete(goal.id)}>Delete</Button>
+                    </ListItem>
                 ))}
-            </ul>
+            </List>
         </div>
     );
 };

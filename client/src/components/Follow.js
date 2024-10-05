@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Button, List, ListItem, ListItemText } from '@mui/material';
 
 const Follow = () => {
     const [users, setUsers] = useState([]);
     const [following, setFollowing] = useState([]);
 
     const fetchUsers = async () => {
-        // Replace with actual API to get all users
-        // Here we assume we have an endpoint to fetch all users
         const response = await axios.get('http://localhost:5000/api/users');
         setUsers(response.data);
     };
@@ -47,18 +46,18 @@ const Follow = () => {
     return (
         <div>
             <h2>Follow Users</h2>
-            <ul>
+            <List>
                 {users.map(user => (
-                    <li key={user.id}>
-                        {user.username} 
+                    <ListItem key={user.id}>
+                        <ListItemText primary={user.username} />
                         {following.some(f => f.id === user.id) ? (
-                            <button onClick={() => handleUnfollow(user.id)}>Unfollow</button>
+                            <Button onClick={() => handleUnfollow(user.id)}>Unfollow</Button>
                         ) : (
-                            <button onClick={() => handleFollow(user.id)}>Follow</button>
+                            <Button onClick={() => handleFollow(user.id)}>Follow</Button>
                         )}
-                    </li>
+                    </ListItem>
                 ))}
-            </ul>
+            </List>
         </div>
     );
 };
