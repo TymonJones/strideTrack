@@ -1,4 +1,6 @@
 import React from 'react';
+import { ThemeProvider } from '@mui/material/styles';
+import theme from './theme'; // Import your theme
 import Register from './components/Register';
 import Login from './components/Login';
 import Goals from './components/Goals';
@@ -7,14 +9,16 @@ import FollowingGoals from './components/FollowingGoals';
 
 function App() {
     return (
-        <div>
-            <h1>StrideTrack</h1>
-            <Register />
-            <Login />
-            <Goals />
-            <Follow />
-            <FollowingGoals />
-        </div>
+        <ThemeProvider theme={theme}>
+            <div>
+                <h1>StrideTrack</h1>
+                <Register />
+                <Login />
+                <Goals />
+                <Follow />
+                <FollowingGoals />
+            </div>
+        </ThemeProvider>
     );
 }
 
