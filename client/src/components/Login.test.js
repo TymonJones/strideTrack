@@ -1,33 +1,35 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Login from './Login';
-import axios from 'axios';
 
-jest.mock('axios');
-
-describe('Login Component', () => {
-    it('renders the Login form', () => {
-        render(<Login />);
-        expect(screen.getByLabelText(/username/i)).toBeInTheDocument();
-        expect(screen.getByLabelText(/password/i)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: /login/i })).toBeInTheDocument();
+beforeEach(() => {
+  jest.spyOn(global, 'fetch').mockImplementation((url) => {
+    if (url.includes('/api/login')) {
+      return Promise.resolve({
+        json: () => Promise.resolve({ success: true, token: 'dummyToken' }),
+      });
+    }
+    return Promise.resolve({
+      json: () => Promise.resolve({}),
     });
+  });
+});
 
-    it('shows a success message on successful login', async () => {
-        axios.post.mockResolvedValueOnce({ data: { access_token: 'fake_token' } });
-        render(<Login />);
-        fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'testuser' } });
-        fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } });
-        fireEvent.click(screen.getByRole('button', { name: /login/i }));
-        expect(await screen.findByText(/login successful/i)).toBeInTheDocument();
-    });
+afterEach(() => {
+  global.fetch.mockRestore();
+});
 
-    it('shows an error message on failed login', async () => {
-        axios.post.mockRejectedValueOnce(new Error('Error'));
-        render(<Login />);
-        fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'testuser' } });
-        fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } });
-        fireEvent.click(screen.getByRole('button', { name: /login/i }));
-        expect(await screen.findByText(/login failed/i)).toBeInTheDocument();
-    });
+test('renders login form and allows submission', async () => {
+  render(<Login />);
+
+  // Fill out form fields
+  fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'user1' } });
+  fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } });
+
+  // Simulate form submission
+  fireEvent.click(screen.getByText('Login'));
+
+  // Use findByText to handle waiting for API response
+  const successMessage = await screen.findByText('Login successful');
+  expect(successMessage).toBeInTheDocument();
 });

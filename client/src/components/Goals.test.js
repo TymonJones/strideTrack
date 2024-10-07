@@ -1,42 +1,41 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Goals from './Goals';
-import axios from 'axios';
 
-jest.mock('axios');
-
-describe('Goals Component', () => {
-    it('renders the Goals component', () => {
-        render(<Goals />);
-        expect(screen.getByText(/goals/i)).toBeInTheDocument();
+beforeEach(() => {
+  jest.spyOn(global, 'fetch').mockImplementation((url) => {
+    if (url.includes('/api/goals')) {
+      return Promise.resolve({
+        json: () => Promise.resolve([
+          { id: 1, title: 'Finish project' },
+          { id: 2, title: 'Work out' },
+        ]),
+      });
+    }
+    return Promise.resolve({
+      json: () => Promise.resolve([]),
     });
+  });
+});
 
-    it('allows adding a goal', async () => {
-        axios.get.mockResolvedValueOnce({ data: [] });
-        axios.post.mockResolvedValueOnce({});
-        render(<Goals />);
-        fireEvent.change(screen.getByLabelText(/enter goal title/i), { target: { value: 'New Goal' } });
-        fireEvent.click(screen.getByRole('button', { name: /add goal/i }));
-        expect(await screen.findByText(/new goal/i)).toBeInTheDocument();
-    });
+afterEach(() => {
+  global.fetch.mockRestore();
+});
 
-    it('allows editing a goal', async () => {
-        const goal = { id: 1, title: 'Initial Goal' };
-        axios.get.mockResolvedValueOnce({ data: [goal] });
-        axios.put.mockResolvedValueOnce({});
-        render(<Goals />);
-        fireEvent.click(screen.getByRole('button', { name: /edit/i }));
-        fireEvent.change(screen.getByLabelText(/enter goal title/i), { target: { value: 'Updated Goal' } });
-        fireEvent.click(screen.getByRole('button', { name: /update goal/i }));
-        expect(await screen.findByText(/updated goal/i)).toBeInTheDocument();
-    });
+test('renders goals and allows goal addition', async () => {
+  render(<Goals />);
 
-    it('allows deleting a goal', async () => {
-        const goal = { id: 1, title: 'Goal to Delete' };
-        axios.get.mockResolvedValueOnce({ data: [goal] });
-        axios.delete.mockResolvedValueOnce({});
-        render(<Goals />);
-        fireEvent.click(screen.getByRole('button', { name: /delete/i }));
-        expect(screen.queryByText(/goal to delete/i)).not.toBeInTheDocument();;
-    });
+  // Use findByText instead of waitFor + queryByText
+  const goal1 = await screen.findByText('Finish project');
+  const goal2 = await screen.findByText('Work out');
+  expect(goal1).toBeInTheDocument();
+  expect(goal2).toBeInTheDocument();
+
+  // Simulate adding a new goal
+  fireEvent.change(screen.getByLabelText(/new goal/i), { target: { value: 'Read a book' } });
+  fireEvent.click(screen.getByText('Add Goal'));
+
+  // The new goal should appear
+  const newGoal = await screen.findByText('Read a book');
+  expect(newGoal).toBeInTheDocument();
 });

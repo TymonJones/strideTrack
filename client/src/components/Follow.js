@@ -1,65 +1,88 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import { Button, List, ListItem, ListItemText } from '@mui/material';
 
 const Follow = () => {
-    const [users, setUsers] = useState([]);
-    const [following, setFollowing] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [following, setFollowing] = useState([]);
 
-    const fetchUsers = async () => {
-        const response = await axios.get('http://localhost:5000/api/users');
-        setUsers(response.data);
-    };
+  const fetchUsers = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/users');
+      const data = await response.json();
+      setUsers(data);
+    } catch (error) {
+      console.error('Failed to fetch users:', error);
+    }
+  };
 
-    const fetchFollowing = async () => {
-        const response = await axios.get('http://localhost:5000/api/following', {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
-        setFollowing(response.data);
-    };
+  const fetchFollowing = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/api/following', {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      const data = await response.json();
+      setFollowing(data);
+    } catch (error) {
+      console.error('Failed to fetch following:', error);
+    }
+  };
 
-    const handleFollow = async (userId) => {
-        await axios.post(`http://localhost:5000/api/follow/${userId}`, {}, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
-        fetchFollowing(); // Refresh following list
-    };
+  const handleFollow = async (userId) => {
+    try {
+      await fetch(`http://localhost:5000/api/follow/${userId}`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      fetchFollowing();
+    } catch (error) {
+      console.error('Failed to follow user:', error);
+    }
+  };
 
-    const handleUnfollow = async (userId) => {
-        await axios.delete(`http://localhost:5000/api/unfollow/${userId}`, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('token')}`,
-            },
-        });
-        fetchFollowing(); // Refresh following list
-    };
+  const handleUnfollow = async (userId) => {
+    try {
+      await fetch(`http://localhost:5000/api/unfollow/${userId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      });
+      fetchFollowing();
+    } catch (error) {
+      console.error('Failed to unfollow user:', error);
+    }
+  };
 
-    useEffect(() => {
-        fetchUsers();
-        fetchFollowing();
-    }, []);
+  useEffect(() => {
+    fetchUsers();
+    fetchFollowing();
+  }, []);
 
-    return (
-        <div>
-            <h2>Follow Users</h2>
-            <List>
-                {users.map(user => (
-                    <ListItem key={user.id}>
-                        <ListItemText primary={user.username} />
-                        {following.some(f => f.id === user.id) ? (
-                            <Button onClick={() => handleUnfollow(user.id)}>Unfollow</Button>
-                        ) : (
-                            <Button onClick={() => handleFollow(user.id)}>Follow</Button>
-                        )}
-                    </ListItem>
-                ))}
-            </List>
-        </div>
-    );
+  return (
+    <div>
+      <h2>Users</h2>
+      <List>
+        {users.map((user) => (
+          <ListItem key={user.id}>
+            <ListItemText primary={user.username} />
+            {following.includes(user.id) ? (
+              <Button variant="contained" color="secondary" onClick={() => handleUnfollow(user.id)}>
+                Unfollow
+              </Button>
+            ) : (
+              <Button variant="contained" color="primary" onClick={() => handleFollow(user.id)}>
+                Follow
+              </Button>
+            )}
+          </ListItem>
+        ))}
+      </List>
+    </div>
+  );
 };
 
 export default Follow;

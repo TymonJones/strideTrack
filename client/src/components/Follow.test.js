@@ -1,33 +1,58 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Follow from './Follow';
-import axios from 'axios';
 
-jest.mock('axios');
-
-describe('Follow Component', () => {
-    it('renders the Follow component', () => {
-        render(<Follow />);
-        expect(screen.getByText(/follow users/i)).toBeInTheDocument();
+// Mocking the fetch API
+beforeEach(() => {
+  jest.spyOn(global, 'fetch').mockImplementation((url) => {
+    if (url.includes('api/users')) {
+      return Promise.resolve({
+        json: () => Promise.resolve([
+          { id: 1, username: 'User1' },
+          { id: 2, username: 'User2' },
+        ]),
+      });
+    }
+    if (url.includes('api/following')) {
+      return Promise.resolve({
+        json: () => Promise.resolve([1]), // Mock following list with user ID 1
+      });
+    }
+    return Promise.resolve({
+      json: () => Promise.resolve([]),
     });
+  });
+});
 
-    it('allows following a user', async () => {
-        const user = { id: 1, username: 'testuser' };
-        axios.get.mockResolvedValueOnce({ data: [user] });
-        axios.post.mockResolvedValueOnce({});
-        render(<Follow />);
-        expect(await screen.findByText(/testuser/i)).toBeInTheDocument();
-        fireEvent.click(screen.getByRole('button', { name: /follow/i }));
-        expect(await screen.findByText(/unfollow/i)).toBeInTheDocument();
-    });
+afterEach(() => {
+  global.fetch.mockRestore();
+});
 
-    it('allows unfollowing a user', async () => {
-        const user = { id: 1, username: 'testuser' };
-        axios.get.mockResolvedValueOnce({ data: [user] });
-        axios.post.mockResolvedValueOnce({});
-        axios.delete.mockResolvedValueOnce({});
-        render(<Follow />);
-        fireEvent.click(screen.getByRole('button', { name: /unfollow/i }));
-        expect(await screen.findByText(/follow/i)).toBeInTheDocument();
-    });
+test('renders users and shows follow/unfollow buttons', async () => {
+  render(<Follow />);
+
+  // Verify that the users are rendered
+  const user1 = await screen.findByText('User1');
+  const user2 = await screen.findByText('User2');
+  expect(user1).toBeInTheDocument();
+  expect(user2).toBeInTheDocument();
+
+  // Check that the first user is already followed, and the second is not
+  const unfollowButton = screen.getByText('Unfollow');
+  const followButton = screen.getByText('Follow');
+  expect(unfollowButton).toBeInTheDocument();
+  expect(followButton).toBeInTheDocument();
+});
+
+test('allows following and unfollowing users', async () => {
+  render(<Follow />);
+
+  const followButton = await screen.findByText('Follow');
+  
+  // Simulate following a user
+  fireEvent.click(followButton);
+  
+  // After clicking, we expect the "Unfollow" button to appear
+  const unfollowButton = await screen.findByText('Unfollow');
+  expect(unfollowButton).toBeInTheDocument();
 });
