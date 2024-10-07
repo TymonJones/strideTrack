@@ -1,11 +1,11 @@
 import React from 'react';
 import { ThemeProvider } from '@mui/material/styles';
-import theme from './theme'; // Import your theme
-import Register from './TaskList.test.js/Register';
-import Login from './TaskList.test.js/Login';
-import Goals from './TaskList.test.js/Goals';
-import Follow from './TaskList.test.js/Follow';
-import FollowingGoals from './TaskList.test.js/FollowingGoals';
+import theme from './theme'; 
+import Register from './components/Register';
+import Login from './components/Login';
+import Goals from './components/Goals';
+import Follow from './components/Follow';
+import FollowingGoals from './components/FollowingGoals';
 
 function App() {
     return (

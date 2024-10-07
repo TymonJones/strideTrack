@@ -1,10 +1,4 @@
-export default {
-  presets: [
-    '@babel/preset-env',
-    '@babel/preset-react',
-  ],
-  plugins: [
-    '@babel/plugin-transform-private-property-in-object',
-    '@babel/plugin-proposal-private-property-in-object',
-  ],
-};
+export const presets = [
+  '@babel/preset-env',
+  '@babel/preset-react',
+];

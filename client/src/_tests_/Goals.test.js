@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Goals from './Goals';
+import Goals from '../components/Goals';
 
 beforeEach(() => {
   jest.spyOn(global, 'fetch').mockImplementation((url) => {

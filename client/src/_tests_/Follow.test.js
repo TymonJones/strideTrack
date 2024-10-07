@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Follow from './Follow';
+import Follow from '../components/Follow';
 
 // Mocking the fetch API
 beforeEach(() => {

@@ -1,12 +1,12 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import Register from './Register';
+import Login from '../components/Login';
 
 beforeEach(() => {
   jest.spyOn(global, 'fetch').mockImplementation((url) => {
-    if (url.includes('/api/register')) {
+    if (url.includes('/api/login')) {
       return Promise.resolve({
-        json: () => Promise.resolve({ success: true, message: 'User registered' }),
+        json: () => Promise.resolve({ success: true, token: 'dummyToken' }),
       });
     }
     return Promise.resolve({
@@ -19,17 +19,17 @@ afterEach(() => {
   global.fetch.mockRestore();
 });
 
-test('renders register form and allows submission', async () => {
-  render(<Register />);
+test('renders login form and allows submission', async () => {
+  render(<Login />);
 
   // Fill out form fields
-  fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'newUser' } });
+  fireEvent.change(screen.getByLabelText(/username/i), { target: { value: 'user1' } });
   fireEvent.change(screen.getByLabelText(/password/i), { target: { value: 'password123' } });
 
   // Simulate form submission
-  fireEvent.click(screen.getByText('Register'));
+  fireEvent.click(screen.getByText('Login'));
 
-  // Use findByText which automatically waits for the element
-  const successMessage = await screen.findByText('User registered');
+  // Use findByText to handle waiting for API response
+  const successMessage = await screen.findByText('Login successful');
   expect(successMessage).toBeInTheDocument();
 });

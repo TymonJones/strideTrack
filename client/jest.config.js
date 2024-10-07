@@ -1,4 +1,4 @@
-// jest.config.js
+
 module.exports = {
     transform: {
       "^.+\\.(js|jsx|ts|tsx)$": "babel-jest", // Add this line to use Babel for transforming JS files
